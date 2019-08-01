@@ -26,7 +26,7 @@ We first need to fit a linear model to output the 15 channels of EVE from the me
 - In canonical_code/ run "python setup_residual_totirr --base path_to_experimental_data/". This will fit a linear model using means and stds of AIA images and a Huber loss, then save the means and stds as well as the model.
 - In canonical_code/, run "python cfg_residual_unified_train_totirr.py --src path_to_config_files/ --data_root path_to_experimental_data/ --target path_to_train_results_folder/". This will read the configuration JSON file, create the specified model using the specified parameters, and train it. It will save train and val losses as well as best performing model into the --target folder.
 - To test the model, run "python cfg_residual_unified_test_totirr.py --src path_to_config_files/ --models path_to_train_results_folder/ --data_root path_to_experimental_data/ --target path_to_test_results_folder/ --phase test". This will generate a text file with errors on the test set (or on whichever --phase you specified).
-/!\ You need to modify the hardcoded path in printErrors() to math the path of your clean data. /!\
+/!\ You need to modify the hardcoded path in printErrors() to the path of your clean data. /!\
 
 ## Use the model for inference
 
@@ -35,8 +35,8 @@ If you want to deploy the model and run inference on new AIA data, you need to d
 - Create a data directoy for the year you want to run on, e.g. "data_folder/2015/". 
 - In canonical_data/, run "python link_to_all.py --base path_to_clean_data/ --data path_to_year_folder/".
 - In canonical_data/, run make_csv_inference.csv, and replace hardcoded paths 'target' and "AIA_base" with the year folder you just created. This will create an index.csv file for that year.
-- From the path_to_experimental_data/ you had for the training, you'll need to copy all the normalisation quantities, as well as the linear model. You can do this with "cp path_to_experimental_data/*.np* path_to_year_folder/"
+- From the path_to_experimental_data/ you had for the training, you'll need to copy all the normalisation quantities, as well as the linear model. You can do this with "cp path_to_experimental_data/\*.np\* path_to_year_folder/"
 - In canonical_code/, run python cfg_residual_unified_test_totirr.py --src path_to_config_files/ --models path_to_train_results_folder/ --data_root path_to_year_folder/ --target path_to_inference_results_folder/". This will generate a numpy array containing the 15 channels of EVE for each AIA time step in index.csv
-
+/!\ You need to modify the hardcoded path in printErrors() to the path of your clean data. /!\
 
 
