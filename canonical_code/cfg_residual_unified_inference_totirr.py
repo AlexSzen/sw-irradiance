@@ -1,22 +1,13 @@
 #!/usr/bin/env python3
 
 '''
-This script is to unify all the "SW_resnet" scripts. 
-We also output training settings in a more consistent way.
-implementation of architecture AIA --> EVE mapping.
-We take a resnet from pytorch model zoo,, replace the final fc layer to a 1x14 output
-corresponding to EVE, and first layer by a depth 9 convolution corresponding to AIA channels.
-
+Use trained model to perform inference on new AIA data without an EVE output.
 '''
 
 import sys
 sys.path.append('Utilities/') #add to pythonpath to get Dataset, hardcoded at the moment
-sys.path.append('../drn/') #add to pythonpath to get drn models, hardcoded atm.
 
-import matplotlib
-matplotlib.use('agg',warn=False, force=True)
 from SW_Dataset_inference import *
-from SW_visualization import *
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -31,7 +22,6 @@ import argparse
 import json
 import pdb
 from scipy.special import logit
-torch.backends.cudnn.benchmark = False
 import os
 ### just to helper to create net directories in results/
 def createFolder(directory):
@@ -83,13 +73,9 @@ def test_model(model, dataloader):
     for batchI,inputs in enumerate(dataloader):
         if batchI % 20 == 0:
             print("%06d/%06d" % (batchI,len(dataloader)))
-        torch.backends.cudnn.benchmark = False
         inputs = inputs.cuda(async = True)
-        torch.backends.cudnn.benchmark = False
         output = model(inputs)
-        torch.backends.cudnn.benchmark = False
         output = output.cpu().detach().numpy()
-        torch.backends.cudnn.benchmark = False
         outputs.append(output)
     outputs = np.concatenate(outputs,axis=0)
     return outputs
@@ -166,24 +152,14 @@ if __name__ == "__main__":
             continue
 
 
-        torch.backends.cudnn.benchmark = False
         sw_net = None
         sw_net = torch.load(modelFile)
         sw_net.cuda()
-
-
-        torch.backends.cudnn.benchmark = False
-        ### Some inputs
-        #
-        #data_root = "/fastdata/FDL/trainSetups/2011_new/"
 
         data_root = args.data_root
 
         phase = args.phase
         phaseAbbrev = {"train":"Tr","val":"Va","test":"Te"}[phase]
-
-#        EVE_path = "%s/irradiance_30mn_residual_14ptot.npy" % data_root
-#        EVE_path_orig = "%s/irradiance_30mn_14ptot.npy" % data_root
 
         model = np.load("%s/residual_initial_model.npz" % data_root)
         feats = np.load("%s/mean_std_feats.npz" % data_root)
@@ -191,14 +167,6 @@ if __name__ == "__main__":
         XTe = addOne((feats['X']-model['mu']) / model['sig'])
         initialPredict = np.dot(XTe,model['model'].T)
 
-
-        #resid = np.load("residuals_2011_new.npz")
-
-        
-        #now this should saturate the gpus
-        #data_root = "/run/shm/AIA_256_20112014/"
-        
-        
         crop = False
         flip = False
         batch_size = 64
@@ -216,8 +184,7 @@ if __name__ == "__main__":
             aia_std = np.load('%s/aia_mean.npy' % data_root)
             aia_transform = transforms.Compose([transforms.Normalize(tuple(aia_mean),tuple(aia_std))])
             
-        ### Dataset & Dataloader for test
-
+        ### Dataset & Dataloader for inference
 
         sw_datasets = {x: SW_Dataset(data_root, data_root, data_root, resolution, cfg['eve_transform'], cfg['eve_sigmoid'], split = x, AIA_transform = aia_transform, crop = crop, flip = flip, crop_res = crop_res, zscore = zscore,self_mean_normalize=True) for x in [phase]}
         sw_dataloaders = {x: torch.utils.data.DataLoader(sw_datasets[x], batch_size = batch_size, shuffle = False, num_workers=8) for x in [phase]}
@@ -230,16 +197,7 @@ if __name__ == "__main__":
         prediction_us = eve_unscale(prediction, DS.EVE_means, DS.EVE_stds, cfg['eve_transform'], cfg['eve_sigmoid'], zscore)
 
 
-        #NP = resid['init'+phaseAbbrev]+prediction_us
         NP = initialPredict + prediction_us
-
- #       PR = np.abs(initialPredict-test_real.EVE) / test_real.EVE
- #       PR[test_real.EVE<0] = np.nan
- #       absErrorLin = np.nanmean(PR,axis=0)
-
-  #      NPR =np.abs(NP-test_real.EVE) / test_real.EVE
-   #     NPR[test_real.EVE<0] = np.nan
-    #    absError = np.nanmean(NPR,axis=0)
 
         np.save(target,NP)
 

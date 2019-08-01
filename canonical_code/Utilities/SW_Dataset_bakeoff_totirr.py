@@ -2,9 +2,6 @@
 
 '''
 Pytorch Dataset class to load AIA and EVE dataset.
-Currently takes all 9 AIA channels and outputs 14 EVE channels. For now in EVE we discard MEGS-B data because
-undersampled, as well as channel 14 in MEGS-A  because heavily undersampled.
-15th channel is integrated MEGS-A irradiance.
 '''
 
 
@@ -96,7 +93,6 @@ class SW_Dataset(Dataset):
         
         ### all AIA channels. first two columns are junk
 
-        #self.index_aia = AIA_root + np.asarray(df_indices[[channel for channel in df_indices.columns[2:11]]])
         self.index_aia = AIA_root + np.asarray(df_indices[[channel for channel in df_indices.columns[2:-1]]])
 
         ### last column is EVE index
@@ -122,10 +118,7 @@ class SW_Dataset(Dataset):
             
         ### need to get rid of the line 13 because no measurements !
         full_EVE = np.load(EVE_path)[:,[0,1,2,3,4,5,6,7,8,9,10,11,12,14,-1]]    
-        #self.EVE = np.zeros((len(self.index_eve), full_EVE.shape[1]))
         self.EVE = full_EVE[self.index_eve,:]
-        #fix invalid entries as a precaution
-        #self.EVE[self.EVE<0] = 0
 
         ### AIA transform : means and stds of sqrt(AIA)
         self.AIA_transform = AIA_transform
@@ -150,11 +143,6 @@ class SW_Dataset(Dataset):
 
     def __getitem__(self, index):
 
-        ### AIA is [time_steps, 9, resolution, resolution]
-        ### EVE is [time_steps, 14]
-        
-        ### load AIA on the fly. load to float64 otherwise pytorch complains (could do float32 too)
-        ### replace the 'fits.' from the file to adapt for the new names
         AIA_sample = np.asarray( [np.load(channel.replace('fits.',''))['x'] for channel in self.index_aia[index, :]], dtype = np.float32 ) 
 
         if self.self_mean_normalize:

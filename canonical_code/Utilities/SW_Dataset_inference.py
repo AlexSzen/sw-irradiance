@@ -93,46 +93,12 @@ class SW_Dataset(Dataset):
         
         self.self_mean_normalize = self_mean_normalize
         
-        ### all AIA channels. first two columns are junk
 
-        #self.index_aia = AIA_root + np.asarray(df_indices[[channel for channel in df_indices.columns[2:11]]])
         self.index_aia = AIA_root + np.asarray(df_indices[[channel for channel in df_indices.columns[1:-1]]])
-
-        ### last column is EVE index
-        #self.index_eve = np.asarray(df_indices[df_indices.columns[-1]]).astype(int)
-       
-        ### EVE processing. What scaling do we use? Do we apply sigmoid? Pass means and stds (computed on scaled EVE)
-        ### They are located in the index file (csv) path)
-        ### Name is hardcoded based on David's normalization files
-        
-        self.EVE_scale = EVE_scale
-        self.EVE_sigmoid = EVE_sigmoid
-        self.zscore = zscore
-        
-        self.EVE_means = np.load(index_file + 'eve_'+EVE_scale+'_mean.npy')
-        self.EVE_stds = np.load(index_file + 'eve_'+EVE_scale+'_std.npy')
-        if (EVE_sigmoid):
-            self.EVE_means = np.load(index_file+ 'eve_'+EVE_scale+'sigmoid'+'_mean.npy')
-            self.EVE_stds = np.load(index_file + 'eve_'+EVE_scale+'sigmoid'+'_std.npy')
-        
-        if (not zscore):
-            self.EVE_means = np.load(index_file+'eve_mean.npy')
-            self.EVE_stds = np.load(index_file + 'eve_std.npy')
-            
-        ### need to get rid of the line 13 because no measurements !
-        #full_EVE = np.load(EVE_path)[:,[0,1,2,3,4,5,6,7,8,9,10,11,12,14,-1]]    
-        #self.EVE = np.zeros((len(self.index_eve), full_EVE.shape[1]))
-        #self.EVE = full_EVE[self.index_eve,:]
-        #fix invalid entries as a precaution
-        #self.EVE[self.EVE<0] = 0
 
         ### AIA transform : means and stds of sqrt(AIA)
         self.AIA_transform = AIA_transform
 
-        ### Check for inconsistencies
-        #data length
-        #if (len(self.index_eve) != len(self.index_aia)):
-        #    raise ValueError('Time length of EVE and AIA are different')
             
         #crop arguments
         if (self.crop and self.crop_res == None):
@@ -149,23 +115,12 @@ class SW_Dataset(Dataset):
 
     def __getitem__(self, index):
 
-        ### AIA is [time_steps, 9, resolution, resolution]
-        ### EVE is [time_steps, 14]
-        
-        ### load AIA on the fly. load to float64 otherwise pytorch complains (could do float32 too)
-        ### replace the 'fits.' from the file to adapt for the new names
-       # AIA_dense = np.asarray( [np.load(channel.replace('fits.',''))['x'] for channel in self.index_aia[index, :]], dtype = np.float32 ) 
-        #divide=2
-        #AIA_sample = np.asarray( ( [np.expand_dims(divide*divide*skimage.transform.downscale_local_mean(AIA_dense[i,:,:], (divide, divide)), axis=0) for i in range(AIA_dense.shape[0])]), dtype=np.float64 )
-        try:
-            AIA_sample = np.asarray( [np.expand_dims(np.load(channel.replace('fits.',''))['x'],axis=0) for channel in self.index_aia[index, :]], dtype = np.float32 )
-            AIA_sample = np.concatenate(AIA_sample,axis=0)
-            divide=2
-            AIA_down = np.asarray( ( [np.expand_dims(divide*divide*skimage.transform.downscale_local_mean(AIA_sample[i,:,:], (divide, divide)), axis=0) for i in range(AIA_sample.shape[0])]), dtype=np.float32 )
-            AIA_sample = np.concatenate(AIA_down, axis = 0)
-        except:
-            print(self.index_aia[index, :])
-            AIA_sample = np.zeros((9,256,256), dtype = np.float32)
+        ### Training in paper is done on 256 images but new data is 512 so we downsample here.
+        AIA_sample = np.asarray( [np.expand_dims(np.load(channel.replace('fits.',''))['x'],axis=0) for channel in self.index_aia[index, :]], dtype = np.float32 )
+        AIA_sample = np.concatenate(AIA_sample,axis=0)
+        divide=2
+        AIA_down = np.asarray( ( [np.expand_dims(divide*divide*skimage.transform.downscale_local_mean(AIA_sample[i,:,:], (divide, divide)), axis=0) for i in range(AIA_sample.shape[0])]), dtype=np.float32 )
+        AIA_sample = np.concatenate(AIA_down, axis = 0)
         if self.self_mean_normalize:
             AIA_sample = AIA_sample - np.mean(AIA_sample,axis=(1,2),keepdims=True)
         
@@ -196,8 +151,6 @@ class SW_Dataset(Dataset):
             AIA_sample = torch.from_numpy(aia_scale(AIA_sample, self.zscore, self.self_mean_normalize))  
             
        
-        #EVE_sample = torch.from_numpy( eve_scale(self.EVE[index, :], self.EVE_means, 
-                         #             self.EVE_stds, self.EVE_scale, self.EVE_sigmoid, self.zscore).astype( np.float32) ).float()
     
         if (self.AIA_transform):
             AIA_sample = self.AIA_transform(AIA_sample)

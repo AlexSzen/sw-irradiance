@@ -6,12 +6,8 @@ Run trained net on test set
 
 import sys
 sys.path.append('Utilities/') #add to pythonpath to get Dataset, hardcoded at the moment
-sys.path.append('../drn/') #add to pythonpath to get drn models, hardcoded atm.
 
-import matplotlib
-matplotlib.use('agg',warn=False, force=True)
 from SW_Dataset_bakeoff_totirr import *
-from SW_visualization import *
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -163,8 +159,6 @@ if __name__ == "__main__":
 
 
         ### Some inputs
-        #
-        #data_root = "/fastdata/FDL/trainSetups/2011_new/"
 
         data_root = args.data_root
 
@@ -180,13 +174,6 @@ if __name__ == "__main__":
         XTe = addOne((feats['X'+phaseAbbrev]-model['mu']) / model['sig'])
         initialPredict = np.dot(XTe,model['model'].T)
 
-
-        #resid = np.load("residuals_2011_new.npz")
-
-        
-        #now this should saturate the gpus
-        #data_root = "/run/shm/AIA_256_20112014/"
-        
         
         crop = False
         flip = False
@@ -223,7 +210,6 @@ if __name__ == "__main__":
         absErrorPointwise[DS.EVE <= 0] = np.nan
 
 
-        #NP = resid['init'+phaseAbbrev]+prediction_us
         NP = initialPredict + prediction_us
 
         PR = np.abs(initialPredict-test_real.EVE) / test_real.EVE

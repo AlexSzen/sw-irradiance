@@ -244,16 +244,11 @@ if __name__ == "__main__":
 
 
         ### Some inputs
-
-        #now this should saturate the gpus
-        #data_root = "/fastdata/FDL/trainSetups/2011p2_new/"
         data_root = args.data_root
 
         EVE_path = "%s/irradiance_30mn_residual_14ptot.npy" % data_root
-        #'/scratch/EVE/irradiance.npy'
 
         csv_dir = data_root
-        #csv_dir = '/run/shm/AIA_2011_256/'
         crop = cfg['crop']
         batch_size = 64
         resolution = 256

@@ -16,20 +16,13 @@ import argparse
 
 def handleStd(index_aia_i):
     # Factor 4 because different image resolution (512) than when training (256)
-    divide = 256
-    print(index_aia_i)
-    try:
-        AIA_sample = np.asarray( [np.expand_dims(np.load(channel.replace('fits.',''))['x'],axis=0) for channel in index_aia_i], dtype = np.float64 )
-        AIA_sample = np.concatenate(AIA_sample,axis=0)
-        divide=2
-        AIA_down = np.asarray( ( [np.expand_dims(divide*divide*skimage.transform.downscale_local_mean(AIA_sample[i,:,:], (divide, divide)), axis=0) for i in range(AIA_sample.shape[0])]), dtype=np.float64 )
-        AIA_sample = np.concatenate(AIA_down, axis = 0)
-        X = np.mean(AIA_sample,axis=(1,2))
-        X = np.concatenate([X,np.std(AIA_sample,axis=(1,2))],axis=0)
-    except:
-        AIA_sample = np.zeros((9,256,256))
-        X = np.mean(AIA_sample,axis=(1,2))
-        X = np.concatenate([X,np.std(AIA_sample,axis=(1,2))],axis=0)
+    AIA_sample = np.asarray( [np.expand_dims(np.load(channel.replace('fits.',''))['x'],axis=0) for channel in index_aia_i], dtype = np.float64 )
+    AIA_sample = np.concatenate(AIA_sample,axis=0)
+    divide=2
+    AIA_down = np.asarray( ( [np.expand_dims(divide*divide*skimage.transform.downscale_local_mean(AIA_sample[i,:,:], (divide, divide)), axis=0) for i in range(AIA_sample.shape[0])]), dtype=np.float64 )
+    AIA_sample = np.concatenate(AIA_down, axis = 0)
+    X = np.mean(AIA_sample,axis=(1,2))
+    X = np.concatenate([X,np.std(AIA_sample,axis=(1,2))],axis=0)
     return np.expand_dims(X,axis=0)
 
 def getX(data_root):
