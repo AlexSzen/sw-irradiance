@@ -24,7 +24,6 @@ if __name__ == "__main__":
     #Where the EVE data is
     src = "/fastdata2/FDL/EVE/np"
     #Where the 6m data should be
-#    target = "/home/szenicer/FDL/sw2018-irradiance/test"
     target = '/fastdata2/data_alex/2011p4_new_fp16_10mn/'
     #Where the AIA data is
     AIA_Base = "/fastdata2/FDL/AIA_256_New_FP16/"
@@ -32,6 +31,7 @@ if __name__ == "__main__":
     if not os.path.exists(target):
         os.mkdir(target)
 
+    ### Edit to get the necessary cadence.
     minutes = range(0,60,10)
 
     #Nx1, Nx#EVE, Nx1
