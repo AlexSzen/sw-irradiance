@@ -7,6 +7,7 @@ import pdb
 import numpy as np
 import datetime
 import pandas as pd
+import argparse
 
 def fitsfn(year,month,day,hour,minute,wavelength):
     fn = "AIA%04d%02d%02d_" % (year,month,day)
@@ -19,14 +20,23 @@ def localFn(year,month,day,hour,minute,wavelength):
     fn = fitsfn(year,month,day,hour,minute,wavelength)
     return "%s%s" % (prefix,fn)
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--eve_root", dest="eve_root", required=True)
+    parser.add_argument("--aia_root", dest="aia_root", required=True)
+    parser.add_argument("--target", dest="target", required=True)
+    args = parser.parse_args()
+    return args
+
 if __name__ == "__main__":
 
+    args = parse_args()
     #Where the EVE data is
-    src = "/fastdata2/FDL/EVE/np"
+    src = args.eve_root
     #Where the 6m data should be
-    target = '/fastdata2/data_alex/2011p4_new_fp16_10mn/'
+    target = args.target
     #Where the AIA data is
-    AIA_Base = "/fastdata2/FDL/AIA_256_New_FP16/"
+    AIA_Base = args.aia_root
 
     if not os.path.exists(target):
         os.mkdir(target)
@@ -47,7 +57,7 @@ if __name__ == "__main__":
 
     for i in range(len(dates)):
         if i % 10000 == 0:
-            print "%d/%d = %.2f" % (i,len(dates),float(i)/len(dates)*100)
+            print("%d/%d = %.2f") % (i,len(dates),float(i)/len(dates)*100)
 
         d = dates[i][:-1].replace("T"," ")
         dtOrig = datetime.datetime.strptime(d,"%Y-%m-%d %H:%M:%S")
@@ -149,7 +159,7 @@ if __name__ == "__main__":
 
         fh.close()
 
-        print "Missing: %d AIA %d EVE\nPresent: %d" % (aiaMissing,eveMissing,present)
+        print("Missing: %d AIA %d EVE\nPresent: %d")% (aiaMissing,eveMissing,present)
 
 
 

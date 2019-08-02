@@ -12,6 +12,7 @@ from torch.utils.data import Dataset
 import sys
 import math
 import pdb
+import skimage.transform
 
 def aia_scale(aia_sample, zscore = True, self_mean_normalize=False):
     if not self_mean_normalize:
@@ -142,9 +143,15 @@ class SW_Dataset(Dataset):
         return len(self.index_eve)
 
     def __getitem__(self, index):
+        ### Training in paper is 256 but now data is 512 so we downsample.
 
-        AIA_sample = np.asarray( [np.load(channel.replace('fits.',''))['x'] for channel in self.index_aia[index, :]], dtype = np.float32 ) 
-
+#        AIA_sample = np.asarray( [np.load(channel.replace('fits.',''))['x'] for channel in self.index_aia[index, :]], dtype = np.float32 ) 
+        AIA_sample = np.asarray( [np.expand_dims(np.load(channel.replace('fits.',''))['x'],axis=0) for channel in self.index_aia[index, :]], dtype = np.float32 )
+        AIA_sample = np.concatenate(AIA_sample,axis=0)
+        divide=2
+        AIA_down = np.asarray( ( [np.expand_dims(divide*divide*skimage.transform.downscale_local_mean(AIA_sample[i,:,:], (divide, divide)), axis=0) for i in range(AIA_sample.shape[0])]), dtype=np.float32 )
+        AIA_sample = np.concatenate(AIA_down, axis = 0)
+ 
         if self.self_mean_normalize:
             AIA_sample = AIA_sample - np.mean(AIA_sample,axis=(1,2),keepdims=True)
         

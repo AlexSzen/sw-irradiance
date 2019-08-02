@@ -7,12 +7,21 @@ In v2 we add a column to numpy array instead of csv
 import numpy as np
 import pandas as pd
 import sys
+import argparse
+import os
 
-out_dir = '/fastdata2/data_alex/2011p4_new_fp16_30mn_totirr/'
-c1 = pd.read_csv('/fastdata2/data_alex/2011p4_new_fp16_10mn/2011_2014.csv')
-c2 = pd.read_csv('2011p4_totirr.csv')
-a_irr = np.load('2011p4_totirr.npy')
-a_init = np.load('/fastdata2/data_alex/2011p4_new_fp16_10mn/irradiance_10m.npy')
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_root", dest="data_root", required=True)
+    args=parser.parse_args()
+    return args
+
+args = parse_args()
+data_root = args.data_root
+c1 = pd.read_csv(os.path.join(data_root, '2011p4.csv'))
+c2 = pd.read_csv(os.path.join(data_root, '2011p4_totirr.csv'))
+a_irr = np.load(os.path.join(data_root, '2011p4_totirr.npy'))
+a_init = np.load(os.path.join(data_root, 'irradiance_10m.npy'))
 
 # Extend irradiance array
 ext = np.full((a_init.shape[0], 1), -100.)
@@ -22,8 +31,9 @@ a_ext = np.hstack((a_init, ext))
 # Indices to drop
 drop_inds = []
 
+print("Beginning merger \n")
 for i in range(len(c1)):
-
+    print("Checking index %d/%d" %(i, len(c1)))
     date = c1['EVE_TIME'].iloc[i].strip().split('T')[0]
     time = c1['EVE_TIME'].iloc[i].strip().split('T')[1]
     hour = time.split(':')[0]
@@ -51,5 +61,5 @@ for i in range(len(c1)):
 # We drop the rows where the total irradiance value is bad or where there is no time match
 c1 = c1.drop(drop_inds)        
 
-np.save(out_dir+'irradiance_30mn_14ptot.npy', a_ext)
-c1.to_csv(out_dir+'irradiance_30mn_14ptot.csv',index=False)
+np.save(os.path.join(data_root, 'irradiance_30mn_14ptot.npy'), a_ext)
+c1.to_csv(os.path.join(data_root, 'irradiance_30mn_14ptot.csv'),index=False)

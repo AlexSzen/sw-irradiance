@@ -32,17 +32,6 @@ def createFolder(directory):
         print ('Error: Creating directory. ' +  directory)
 
 
-def printErrors(R):
-    names = np.load("/fastdata2/FDL/EVE/np/name.npy")
-    inds = [0,1,2,3,4,5,6,7,8,9,10,11,12,14]
-    names = names[inds]
-    names = np.append(names,'tot_irr_megsa')
-    for i in range(R.shape[0]):
-        if i != 0:
-            print("; ",end=' '),
-        print("%s: %.2f%%" % (names[i].strip(),R[i]),end=' ')
-    print('')
-
 def getResid(y,yp,mask,flare=None,flarePct=0.975):
     resid = np.abs(y-yp)
     resid = resid / np.abs(y) * 100
@@ -59,14 +48,6 @@ def getResid(y,yp,mask,flare=None,flarePct=0.975):
         else:
             keep = order[:cutoff]
         return np.nanmean(resid[keep,:],axis=0)
-
-def print_analysis(y,yp,mask):
-    print("Overall")
-    printErrors(getResid(y,yp,mask))
-    print("Flare")
-    printErrors(getResid(y,yp,mask,flare=True))
-    print("Non-Flare")
-    printErrors(getResid(y,yp,mask,flare=False))
 
 def test_model(model, dataloader):
     outputs = []

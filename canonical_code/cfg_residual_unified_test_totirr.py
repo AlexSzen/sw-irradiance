@@ -33,8 +33,8 @@ def createFolder(directory):
         print ('Error: Creating directory. ' +  directory)
 
 
-def printErrors(R):
-    names = np.load("/fastdata2/FDL/EVE/np/name.npy")
+def printErrors(R, eve_root):
+    names = np.load(os.path.join(eve_root,"name.npy"))
     inds = [0,1,2,3,4,5,6,7,8,9,10,11,12,14]
     names = names[inds]
     names = np.append(names,'tot_irr_megsa')
@@ -61,13 +61,13 @@ def getResid(y,yp,mask,flare=None,flarePct=0.975):
             keep = order[:cutoff]
         return np.nanmean(resid[keep,:],axis=0)
 
-def print_analysis(y,yp,mask):
+def print_analysis(y,yp,mask,eve_root):
     print("Overall")
-    printErrors(getResid(y,yp,mask))
+    printErrors(getResid(y,yp,mask), eve_root)
     print("Flare")
-    printErrors(getResid(y,yp,mask,flare=True))
+    printErrors(getResid(y,yp,mask,flare=True), eve_root)
     print("Non-Flare")
-    printErrors(getResid(y,yp,mask,flare=False))
+    printErrors(getResid(y,yp,mask,flare=False), eve_root)
 
 def test_model(model, dataloader):
     outputs = []
@@ -118,6 +118,7 @@ def parse_args():
     parser.add_argument('--target',dest='target',required=True)
     parser.add_argument('--data_root',dest='data_root',required=True)
     parser.add_argument('--phase',dest='phase',default='test')
+    parser.add_argument('--eve_root', dest='eve_root', required=True)
     args = parser.parse_args()
     return args
 
@@ -161,7 +162,7 @@ if __name__ == "__main__":
         ### Some inputs
 
         data_root = args.data_root
-
+        eve_root = args.eve_root
         phase = args.phase
         phaseAbbrev = {"train":"Tr","val":"Va","test":"Te"}[phase]
 
@@ -228,13 +229,13 @@ if __name__ == "__main__":
         print(absErrorLin)
 
 
-        print_analysis(test_real.EVE,initialPredict,test_real.EVE<0)
+        print_analysis(test_real.EVE,initialPredict,test_real.EVE<0, eve_root)
 
 
         summaryStats = "Min: %.4f Mean: %.4f Median: %.4f Max: %.4f" % (np.min(absError),np.mean(absError),np.median(absError),np.max(absError))
         print(summaryStats)
         print(absError)
-        print_analysis(test_real.EVE,NP,test_real.EVE<0)
+        print_analysis(test_real.EVE,NP,test_real.EVE<0, eve_root)
 
         resFile = open("%s/%s.txt" % (targetBase,cfgName),"w")
         resFile.write(summaryStats+"\n")

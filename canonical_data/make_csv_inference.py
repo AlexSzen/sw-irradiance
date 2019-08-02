@@ -7,6 +7,7 @@ import pdb
 import numpy as np
 import datetime
 import pandas as pd
+import argparse
 
 def fitsfn(year,month,day,hour,minute,wavelength):
     fn = "AIA%04d%02d%02d_" % (year,month,day)
@@ -19,22 +20,26 @@ def localFn(year,month,day,hour,minute,wavelength):
     fn = fitsfn(year,month,day,hour,minute,wavelength)
     return "%s%s" % (prefix,fn)
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_root', dest='data_root', required=True)
+    parser.add_argument('--target', dest='target', required=True)
+    parser.add_argument('--year', dest='year', required=True)
+    args = parser.parse_args()
+    return args
+
 if __name__ == "__main__":
 
-    #Where the 6m data should be
-#    target = "/home/szenicer/FDL/sw2018-irradiance/test"
-    target = '/home/alexszn/data/2015/'
-    #Where the AIA data is
-    AIA_Base = "/w/SDO/2015/AIA/"
-
+    args = parse_args()
+    target = args.target
+    AIA_Base = args.data_root
+    year = int(args.year)
     if not os.path.exists(target):
         os.mkdir(target)
 
     minutes = range(0,60,6)
 
-
-
-    for y in range(2015,2016):
+    for y in range(year,year+1):
         startDate = datetime.date(y,1,1)
         endDate = datetime.date(y+1,1,1)
         dayDelta = datetime.timedelta(days=1)
