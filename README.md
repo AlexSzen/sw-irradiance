@@ -5,7 +5,7 @@ This is the repository containing code to reproduce the main results from the pa
 
 ## Setup the data
 
-- Download data from the stanford repo, which totals 6.5TB. Following are the link for different years. 
+- Download data from the stanford repo, which totals 6.5TB. Following are the links to download data for different years. 
   * 2010: https://purl.stanford.edu/vk217bh4910
   * 2011: https://purl.stanford.edu/jc488jb7715
   * 2012: https://purl.stanford.edu/dc156hp0190
