@@ -6,15 +6,15 @@ This is the repository containing code to reproduce the main results from the pa
 ## Setup the data
 
 - Download data from the stanford repo, which totals 6.5TB. Following are the link for different years. 
-2010: https://purl.stanford.edu/vk217bh4910
-2011: https://purl.stanford.edu/jc488jb7715
-2012: https://purl.stanford.edu/dc156hp0190
-2013: https://purl.stanford.edu/km388vz4371
-2014: https://purl.stanford.edu/sr325xz9271
-2015: https://purl.stanford.edu/qw012qy2533
-2016: https://purl.stanford.edu/vf806tr8954
-2017: https://purl.stanford.edu/kp222tm1554
-2018: https://purl.stanford.edu/nk828sc2920
+  * 2010: https://purl.stanford.edu/vk217bh4910
+  * 2011: https://purl.stanford.edu/jc488jb7715
+  * 2012: https://purl.stanford.edu/dc156hp0190
+  * 2013: https://purl.stanford.edu/km388vz4371
+  * 2014: https://purl.stanford.edu/sr325xz9271
+  * 2015: https://purl.stanford.edu/qw012qy2533
+  * 2016: https://purl.stanford.edu/vf806tr8954
+  * 2017: https://purl.stanford.edu/kp222tm1554
+  * 2018: https://purl.stanford.edu/nk828sc2920
 
 - You should now have a folder with AIA data, 39 channels of EVE data, and separate .npy and .csv files for the integrated EVE MEGS-A irradiance.
 - Create another folder for data in which we'll create symlinks for AIA images, so as not to mess up your "clean" data folder. For instance call it "data_30mn_cadence" because that's the cadence we'll be working with here.
