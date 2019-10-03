@@ -2,6 +2,8 @@
 
 This is the repository containing code to reproduce the main results from the paper "A Deep Learning Virtual Instrument for Monitoring Extreme UV Solar Spectral Irradiance".  The code included here allows to train the best performing linear+CNN model presented in the paper to map AIA data to 15 channels of EVE MEGS-A spectra, as well as to deploy this model to perform inference on new AIA data.
 
+![alt text](https://github.com/AlexSzen/sw-irradiance/blob/master/AIA_model_EVE.gif)
+
 
 ## Setup the data
 
